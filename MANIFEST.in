@@ -1,0 +1,5 @@
+include README.rst
+include COPYING
+include examples/*.py
+include versioneer.py
+include gpiochip2/_version.py
