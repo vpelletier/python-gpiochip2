@@ -27,7 +27,8 @@ this could cause all sort of problems, including permanent hardware damage.
 
 This is only to be taken as a quick overview of this module's API.
 
-```python
+.. code:: python
+
     from gpiochip2 import GPIOChip, GPIO_V2_LINE_FLAG
     with GPIOChip('/dev/gpiochip0', 'w+b') as gpiochip:
         # Get information about the gpio chip itself
@@ -59,6 +60,5 @@ This is only to be taken as a quick overview of this module's API.
             gpio_lines &= 2 # 1 << 1
             # Read event
             lines.getEvent()
-```
 
 See also the `examples` directory for more realistic code.
