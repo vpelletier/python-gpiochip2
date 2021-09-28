@@ -313,6 +313,8 @@ class GPIOLines(IOCTLFileIO):
     def lines(self) -> int:
         """
         Returns a bitfield of lines managed by this instance.
+
+        Reads the lines.
         """
         line_values = gpio_v2_line_values(mask=self.__all_line_mask)
         self._ioctl(GPIO_V2_LINE_GET_VALUES_IOCTL, line_values)
@@ -322,6 +324,8 @@ class GPIOLines(IOCTLFileIO):
     def lines(self, value: int) -> None:
         """
         Change all lines to given bitfield.
+
+        Does not read the lines.
         """
         mask = self.__all_line_mask
         if value < 0:
@@ -336,18 +340,24 @@ class GPIOLines(IOCTLFileIO):
     def __int__(self) -> int:
         """
         Bitfield of lines managed by this instance.
+
+        Reads the lines.
         """
         return self.lines
 
     def __invert__(self) -> int:
         """
         Inverted bitfield of lines managed by this instance.
+
+        Reads the lines.
         """
         return ~self.lines
 
     def __iand__(self, value: int) -> None:
         """
         Make some lines inactive.
+
+        Does not read the lines.
         """
         self._ioctl(
             GPIO_V2_LINE_SET_VALUES_IOCTL,
@@ -360,6 +370,8 @@ class GPIOLines(IOCTLFileIO):
     def __ior__(self, value: int) -> None:
         """
         Make some lines active.
+
+        Does not read the lines.
         """
         self._ioctl(
             GPIO_V2_LINE_SET_VALUES_IOCTL,
@@ -369,6 +381,8 @@ class GPIOLines(IOCTLFileIO):
     def __ixor__(self, value: int) -> None:
         """
         Inverse some lines.
+
+        Reads the lines.
         """
         self._ioctl(
             GPIO_V2_LINE_SET_VALUES_IOCTL,
@@ -378,6 +392,8 @@ class GPIOLines(IOCTLFileIO):
     def __ilshift__(self, value: int) -> None:
         """
         Shift line status left.
+
+        Reads the lines.
         """
         self._ioctl(
             GPIO_V2_LINE_GET_VALUES_IOCTL,
@@ -390,6 +406,8 @@ class GPIOLines(IOCTLFileIO):
     def __irshift__(self, value: int) -> None:
         """
         Shift line status left.
+
+        Reads the lines.
         """
         self._ioctl(
             GPIO_V2_LINE_GET_VALUES_IOCTL,

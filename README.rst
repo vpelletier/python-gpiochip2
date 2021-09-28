@@ -3,8 +3,8 @@ Pythonic API for Linux's gpiochip chardev ABI v2.
 Features
 --------
 
-- Manage multile GPIO lines at the same time, with bit operation affecting the
-  entire line group at the same time (`|=`, `&=`, `^=`).
+- Manage multiple GPIO lines at the same time, with bit operation affecting the
+  entire line group at once (`|=`, `&=`, `^=`).
 - Get file event notification of timestamped line events (rising edge, falling
   edge).
 - Get file event notifications (select, poll, epoll...) of gpiochip-level and
@@ -60,5 +60,12 @@ This is only to be taken as a quick overview of this module's API.
             gpio_lines &= 2 # 1 << 1
             # Read event
             lines.getEvent()
+
+Notes on bit operations:
+
+``gpio_lines.lines |= some_mask`` will read then write the GPIO, while
+``gpio_lines |= some_mask`` only needs to write, making it more efficient.
+
+The same applies to ``&=``, but not to other operators.
 
 See also the `examples` directory for more realistic code.
