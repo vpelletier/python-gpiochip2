@@ -1,4 +1,4 @@
-Pythonic API for linux's gpiochip chardev ABI v2.
+Pythonic API for Linux's gpiochip chardev ABI v2.
 
 Features
 --------
