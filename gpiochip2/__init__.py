@@ -259,11 +259,12 @@ class GPIOLines(IOCTLFileIO):
             ),
         )
 
-    def getEvent(self) -> GPIOLineEvent:
+    def getEvent(self) -> Union[GPIOLineEvent, None]:
         """
         Read and and decode a line event.
 
-        Returns a dict, with keys:
+        If an entire event could be read, returns a dict with the following
+        keys:
         - timestamp_ns (int)
           The timestamp at which the kernel noticed the event on the GPIO line,
           in nanoseconds.
@@ -275,9 +276,13 @@ class GPIOLines(IOCTLFileIO):
           The global sequence number of this event in this instance.
         - line_seqno (int)
           The sequence number of this event on the line identified by "offset".
+        If nothing was read (file is in O_NONBLOCK mode), returns None.
+        If an unexpected number of bytes was read, raises IOError.
         """
         event = gpio_v2_line_event()
         byte_count = self.readinto(event)
+        if byte_count is None:
+            return None
         if byte_count != sizeof(event):
             raise IOError(
                 'Expected %i bytes, got %r' % (
@@ -571,20 +576,25 @@ class GPIOChip(IOCTLFileIO):
         """
         self._ioctl(GPIO_GET_LINEINFO_UNWATCH_IOCTL, line)
 
-    def getEvent(self) -> GPIOChipEvent:
+    def getEvent(self) -> Union[GPIOChipEvent, None]:
         """
         Read and decode one line info change event.
 
-        Returns a dict with the following keys:
+        If an entire event could be read, returns a dict with the following
+        keys:
         - "info" (dict)
           See getLineInfo.
         - "timestamp_ns" (int)
           The timestamp at which this event happened, in nanoseconds.
         - "event_type" (int)
           One of the GPIO_V2_LINE_CHANGED_TYPE.* constants.
+        If nothing was read (file is in O_NONBLOCK mode), returns None.
+        If an unexpected number of bytes was read, raises IOError.
         """
         event = gpio_v2_line_info_changed()
         byte_count = self.readinto(event)
+        if byte_count is None:
+            return None
         if byte_count != sizeof(event):
             raise IOError(
                 'Expected %i bytes, got %r' % (
