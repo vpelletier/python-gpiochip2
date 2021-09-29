@@ -141,60 +141,44 @@ def _getLineConfigurationStruct(
     default_dict: Optional[Dict[int, bool]],
     debounce_period_us_dict: Optional[Dict[int, int]],
 ) -> gpio_v2_line_config:
-    attribute_list = []
+    result = gpio_v2_line_config(flags=flags)
+    attribute_index = 0
     if flags_dict:
         reverse_flags_dict = defaultdict(list)
         for line_index, line_flags in flags_dict.items():
             reverse_flags_dict[line_flags].append(line_index)
         for line_flags, line_index_list in reverse_flags_dict.items():
-            attribute_list.append(
-                gpio_v2_line_config_attribute(
-                    attr=gpio_v2_line_attribute(
-                        id=GPIO_V2_LINE_ATTR_ID.FLAGS,
-                        flags=line_flags,
-                    ),
-                    mask=_lineIndexList2Mask(
-                        line_index_list=line_index_list,
-                        line_count=line_count,
-                    ),
-                ),
+            attr = result.attrs[attribute_index]
+            attribute_index += 1
+            attr.attr.id = GPIO_V2_LINE_ATTR_ID.FLAGS
+            attr.attr.flags = line_flags
+            attr.mask = _lineIndexList2Mask(
+                line_index_list=line_index_list,
+                line_count=line_count,
             )
     if default_dict:
-        attribute_list.append(
-            gpio_v2_line_config_attribute(
-                attr=gpio_v2_line_attribute(
-                    id=GPIO_V2_LINE_ATTR_ID.OUTPUT_VALUES,
-                    values=sum(1 << x for x, y in default_dict.items() if y),
-                ),
-                mask=_lineIndexList2Mask(
-                    line_index_list=default_dict,
-                    line_count=line_count,
-                ),
-            ),
+        attr = result.attrs[attribute_index]
+        attribute_index += 1
+        attr.attr.id = GPIO_V2_LINE_ATTR_ID.OUTPUT_VALUES
+        attr.attr.values = sum(1 << x for x, y in default_dict.items() if y)
+        attr.mask = _lineIndexList2Mask(
+            line_index_list=default_dict,
+            line_count=line_count,
         )
     if debounce_period_us_dict:
         reverse_debounce_dict = defaultdict(list)
         for line_index, line_debounce in debounce_period_us_dict.items():
             reverse_debounce_dict[line_debounce].append(line_index)
         for line_debounce, line_index_list in reverse_debounce_dict.items():
-            attribute_list.append(
-                gpio_v2_line_config_attribute(
-                    attr=gpio_v2_line_attribute(
-                        id=GPIO_V2_LINE_ATTR_ID.DEBOUNCE,
-                        debounce_period_us=line_debounce,
-                    ),
-                    mask=_lineIndexList2Mask(
-                        line_index_list=line_index_list,
-                        line_count=line_count,
-                    ),
-                ),
+            attr = result.attrs[attribute_index]
+            attribute_index += 1
+            attr.attr.id = GPIO_V2_LINE_ATTR_ID.DEBOUNCE
+            attr.attr.debounce_period_us = line_debounce
+            attr.mask = _lineIndexList2Mask(
+                line_index_list=line_index_list,
+                line_count=line_count,
             )
-    result = gpio_v2_line_config(
-        flags=flags,
-        num_attrs=len(attribute_list),
-    )
-    for index, attribute in enumerate(attribute_list):
-        gpio_v2_line_config.attrs[index] = attribute
+    result.num_attrs = attribute_index
     return result
 
 class IOCTLFileIO(io.FileIO):
