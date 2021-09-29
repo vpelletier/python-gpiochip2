@@ -337,7 +337,7 @@ class GPIOLines(IOCTLFileIO):
         """
         return ~self.lines
 
-    def __iand__(self, value: int) -> None:
+    def __iand__(self, value: int) -> GPIOLines:
         """
         Make some lines inactive.
 
@@ -350,8 +350,9 @@ class GPIOLines(IOCTLFileIO):
                 mask=(~value) & 0xffffffff_ffffffff,
             ),
         )
+        return self
 
-    def __ior__(self, value: int) -> None:
+    def __ior__(self, value: int) -> GPIOLines:
         """
         Make some lines active.
 
@@ -361,8 +362,9 @@ class GPIOLines(IOCTLFileIO):
             GPIO_V2_LINE_SET_VALUES_IOCTL,
             gpio_v2_line_values(bits=value, mask=value),
         )
+        return self
 
-    def __ixor__(self, value: int) -> None:
+    def __ixor__(self, value: int) -> GPIOLines:
         """
         Inverse some lines.
 
@@ -372,8 +374,9 @@ class GPIOLines(IOCTLFileIO):
             GPIO_V2_LINE_SET_VALUES_IOCTL,
             gpio_v2_line_values(bits=self.lines ^ value, mask=value),
         )
+        return self
 
-    def __ilshift__(self, value: int) -> None:
+    def __ilshift__(self, value: int) -> GPIOLines:
         """
         Shift line status left.
 
@@ -386,8 +389,9 @@ class GPIOLines(IOCTLFileIO):
                 mask=self.__all_line_mask,
             ),
         )
+        return self
 
-    def __irshift__(self, value: int) -> None:
+    def __irshift__(self, value: int) -> GPIOLines:
         """
         Shift line status left.
 
@@ -400,6 +404,7 @@ class GPIOLines(IOCTLFileIO):
                 mask=self.__all_line_mask,
             ),
         )
+        return self
 
 class GPIOChip(IOCTLFileIO):
     """
