@@ -326,22 +326,6 @@ class GPIOLines(IOCTLFileIO):
             gpio_v2_line_values(bits=value, mask=mask),
         )
 
-    def __int__(self) -> int:
-        """
-        Bitfield of lines managed by this instance.
-
-        Reads the lines.
-        """
-        return self.lines
-
-    def __invert__(self) -> int:
-        """
-        Inverted bitfield of lines managed by this instance.
-
-        Reads the lines.
-        """
-        return ~self.lines
-
     def __iand__(self, value: int) -> GPIOLines:
         """
         Make some lines inactive.
@@ -366,48 +350,6 @@ class GPIOLines(IOCTLFileIO):
         self._ioctl(
             GPIO_V2_LINE_SET_VALUES_IOCTL,
             gpio_v2_line_values(bits=value, mask=value),
-        )
-        return self
-
-    def __ixor__(self, value: int) -> GPIOLines:
-        """
-        Inverse some lines.
-
-        Reads the lines.
-        """
-        self._ioctl(
-            GPIO_V2_LINE_SET_VALUES_IOCTL,
-            gpio_v2_line_values(bits=self.lines ^ value, mask=value),
-        )
-        return self
-
-    def __ilshift__(self, value: int) -> GPIOLines:
-        """
-        Shift line status left.
-
-        Reads the lines.
-        """
-        self._ioctl(
-            GPIO_V2_LINE_GET_VALUES_IOCTL,
-            gpio_v2_line_values(
-                bits=self.lines << value,
-                mask=self.__all_line_mask,
-            ),
-        )
-        return self
-
-    def __irshift__(self, value: int) -> GPIOLines:
-        """
-        Shift line status left.
-
-        Reads the lines.
-        """
-        self._ioctl(
-            GPIO_V2_LINE_GET_VALUES_IOCTL,
-            gpio_v2_line_values(
-                bits=self.lines >> value,
-                mask=self.__all_line_mask,
-            ),
         )
         return self
 

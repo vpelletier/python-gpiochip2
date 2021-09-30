@@ -52,12 +52,10 @@ This is only to be taken as a quick overview of this module's API.
             value = gpio_lines.lines
             # Change lines state
             gpio_lines.lines = 0b11
-            # Invert line 20
-            gpio_lines ^= 1 # 1 << 0
             # Set line 21
             gpio_lines |= 2 # 1 << 1
-            # Clear line 21
-            gpio_lines &= 2 # 1 << 1
+            # Clear line 20
+            gpio_lines &= 1 # 1 << 0
             # Read event
             lines.getEvent()
 
