@@ -44,7 +44,7 @@ GPIO_V2_LINES_MAX = 64
 GPIO_V2_LINE_NUM_ATTRS_MAX = 10
 
 @enum.unique
-class GPIO_V2_LINE_FLAG(enum.IntEnum):
+class GPIO_V2_LINE_FLAG(enum.IntFlag):
     USED                 = 1 << 0
     ACTIVE_LOW           = 1 << 1
     INPUT                = 1 << 2
@@ -65,7 +65,7 @@ class gpio_v2_line_values(ctypes.Structure):
     )
 
 @enum.unique
-class GPIO_V2_LINE_ATTR_ID(enum.IntEnum):
+class GPIO_V2_LINE_ATTR_ID(enum.IntFlag):
     FLAGS         = 1
     OUTPUT_VALUES = 2
     DEBOUNCE      = 3
@@ -122,7 +122,7 @@ class gpio_v2_line_info(ctypes.Structure):
     )
 
 @enum.unique
-class GPIO_V2_LINE_CHANGED_TYPE(enum.IntEnum):
+class GPIO_V2_LINE_CHANGED_TYPE(enum.IntFlag):
     REQUESTED = 1
     RELEASED  = 2
     CONFIG    = 3
@@ -136,7 +136,7 @@ class gpio_v2_line_info_changed(ctypes.Structure):
     )
 
 @enum.unique
-class GPIO_V2_LINE_EVENT_ID(enum.IntEnum):
+class GPIO_V2_LINE_EVENT_ID(enum.IntFlag):
     RISING_EDGE  = 1
     FALLING_EDGE = 2
 
