@@ -236,7 +236,7 @@ class GPIOLines(IOCTLFileIO):
         self.__all_line_mask = (1 << line_count) - 1
         super().__init__(*args, **kw)
 
-    def setLineConfiguration(
+    def setConfiguration(
         self,
         flags: int,
         flags_dict: Optional[Dict[int, int]]=(), # type: ignore
@@ -299,7 +299,7 @@ class GPIOLines(IOCTLFileIO):
         }
 
     @property
-    def lines(self) -> int:
+    def value(self) -> int:
         """
         Returns a bitfield of lines managed by this instance.
 
@@ -309,8 +309,8 @@ class GPIOLines(IOCTLFileIO):
         self._ioctl(GPIO_V2_LINE_GET_VALUES_IOCTL, line_values)
         return line_values.bits
 
-    @lines.setter
-    def lines(self, value: int) -> None:
+    @value.setter
+    def value(self, value: int) -> None:
         """
         Change all lines to given bitfield.
 

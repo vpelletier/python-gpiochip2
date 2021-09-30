@@ -49,9 +49,9 @@ This is only to be taken as a quick overview of this module's API.
             },
         ) as gpio_lines:
             # Read lines state
-            value = gpio_lines.lines
+            value = gpio_lines.value
             # Change lines state
-            gpio_lines.lines = 0b11
+            gpio_lines.value = 0b11
             # Set line 21
             gpio_lines |= 2 # 1 << 1
             # Clear line 20
