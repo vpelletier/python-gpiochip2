@@ -326,7 +326,7 @@ class GPIOLines(IOCTLFileIO):
             gpio_v2_line_values(bits=value, mask=mask),
         )
 
-    def __iand__(self, value: int) -> GPIOLines:
+    def __iand__(self, value: int) -> 'GPIOLines':
         """
         Make some lines inactive.
 
@@ -341,7 +341,7 @@ class GPIOLines(IOCTLFileIO):
         )
         return self
 
-    def __ior__(self, value: int) -> GPIOLines:
+    def __ior__(self, value: int) -> 'GPIOLines':
         """
         Make some lines active.
 
