@@ -294,7 +294,7 @@ class GPIOLines(IOCTLFileIO):
             )
         return {
             'timestamp_ns': event.timestamp_ns,
-            'id': event.id,
+            'id': GPIO_V2_LINE_EVENT_ID(event.id),
             'offset': event.offset,
             'seqno': event.seqno,
             'line_seqno': event.line_seqno,
@@ -569,12 +569,12 @@ class GPIOChip(IOCTLFileIO):
             'name': line_info.name,
             'consumer': line_info.consumer,
             'offset': line_info.offset,
-            'flags': line_info.flags,
+            'flags': GPIO_V2_LINE_FLAG(line_info.flags),
         }
         for attr in line_info.attrs[:line_info.num_attrs]:
             attr_id = attr.id
             if attr_id == GPIO_V2_LINE_ATTR_ID.FLAGS:
-                result['flags'] = attr.flags
+                result['flags'] = GPIO_V2_LINE_FLAG(attr.flags)
             elif attr_id == GPIO_V2_LINE_ATTR_ID.OUTPUT_VALUES:
                 result['values'] = attr.values
             elif attr_id == GPIO_V2_LINE_ATTR_ID.DEBOUNCE:
@@ -662,5 +662,5 @@ class GPIOChip(IOCTLFileIO):
         return {
             'info': self._decodeLineInfo(event.info),
             'timestamp_ns': event.timestamp_ns,
-            'event_type': event.event_type,
+            'event_type': GPIO_V2_LINE_CHANGED_TYPE(event.event_type),
         }
