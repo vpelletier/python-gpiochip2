@@ -26,6 +26,7 @@ This package allows programs to use the latter.
 from collections import defaultdict
 from collections.abc import Iterable
 from ctypes import sizeof
+import enum
 import errno
 from fcntl import ioctl
 import io
@@ -116,6 +117,7 @@ else:
 __all__ = (
     'GPIOChip', 'GPIOLines',
     'GPIO_V2_LINE_FLAG', 'GPIO_V2_LINE_CHANGED_TYPE', 'GPIO_V2_LINE_EVENT_ID',
+    'EXPECT_PRECONFIGURED', 'FlagMismatch',
 )
 
 # Note: line_index_list should be Iterable[int], but pypy3 Iterable,
@@ -353,6 +355,78 @@ class GPIOLines(IOCTLFileIO):
         )
         return self
 
+@enum.unique
+class EXPECT_PRECONFIGURED(enum.IntFlag): # pylint: disable=invalid-name
+    """
+    For use in GPIOChip.openLines arguments expect_preconfigured{,_dict}.
+    """
+    ACTIVE_LEVEL = 1 << 0
+    DIRECTION    = 1 << 1
+    EDGE         = 1 << 2
+    DRIVE        = 1 << 3
+    BIAS         = 1 << 4
+
+_EXPECT_PRECONFIGURED_LIST = (
+    (
+        EXPECT_PRECONFIGURED.ACTIVE_LEVEL,
+        GPIO_V2_LINE_FLAG.ACTIVE_LOW,
+    ),
+    (
+        EXPECT_PRECONFIGURED.DIRECTION,
+        (
+            GPIO_V2_LINE_FLAG.INPUT |
+            GPIO_V2_LINE_FLAG.OUTPUT
+        ),
+    ),
+    (
+        EXPECT_PRECONFIGURED.EDGE,
+        (
+            GPIO_V2_LINE_FLAG.EDGE_RISING |
+            GPIO_V2_LINE_FLAG.EDGE_FALLING
+        ),
+    ),
+    (
+        EXPECT_PRECONFIGURED.DRIVE,
+        (
+            GPIO_V2_LINE_FLAG.OPEN_DRAIN |
+            GPIO_V2_LINE_FLAG.OPEN_SOURCE
+        ),
+    ),
+    (
+        EXPECT_PRECONFIGURED.BIAS,
+        (
+            GPIO_V2_LINE_FLAG.BIAS_PULL_UP |
+            GPIO_V2_LINE_FLAG.BIAS_PULL_DOWN |
+            GPIO_V2_LINE_FLAG.BIAS_DISABLED
+        ),
+    ),
+)
+
+class FlagMismatch(Exception):
+    """
+    Raised when a line's flags do not match the expected value.
+    """
+    def __init__(
+        self,
+        line: int,
+        line_flags: int,
+        request_flags: int,
+        expectation: int,
+        mask: int,
+    ):
+        super().__init__(
+            'Line %i flags %r do not match expected value: %r' % (
+                line,
+                line_flags & mask,
+                request_flags & mask,
+            )
+        )
+        self.line = line
+        self.line_flags = line_flags
+        self.request_flags = request_flags
+        self.expectation = expectation
+        self.mask = mask
+
 class GPIOChip(IOCTLFileIO):
     """
     Wrapper for the /dev/gpiochip* device class.
@@ -367,6 +441,8 @@ class GPIOChip(IOCTLFileIO):
         default_dict: Optional[Dict[int, bool]]=(), # type: ignore
         debounce_period_us_dict: Optional[Dict[int, int]]=(), # type: ignore
         event_buffer_size: int=0,
+        expect_preconfigured: int=0,
+        expect_preconfigured_dict: Optional[Dict[int, int]]=(), # type: ignore
     ) -> GPIOLines:
         """
         Request GPIO lines.
@@ -403,9 +479,48 @@ class GPIOChip(IOCTLFileIO):
             only need to tweak this if your event handling falls behind and
             events get lost.
             The kernel may disobey this value (ex: if it is too large).
+        expect_preconfigured (int)
+            Bitmask of EXPECT_PRECONFIGURED.* .
+            In a well-configured board, the GPIO lines should come already
+            somewhat preconfigured. This parameter controls which line
+            properties are being checked before requesting the lines, to avoid
+            opening an unexpected line, potentially wrecking havoc on the
+            system.
+            Note that you can reconfigure lines after opening, using
+            GPIOLines.setConfiguration .
+            If there is a mismatch, raises FlagMismatch.
+        expect_preconfigured_dict (int: int)
+            Like expect_preconfigured, but per-line.
+            Key is the line index in line_list.
+            Value is a bitmask of EXPECT_PRECONFIGURED.* .
 
         Returns a GPIOLines instance.
         """
+        flags_dict = dict(flags_dict) # type: ignore
+        if expect_preconfigured or expect_preconfigured_dict:
+            expect_preconfigured_dict = dict(
+                expect_preconfigured_dict, # type: ignore
+            )
+            for index, line in enumerate(line_list):
+                line_flags = self.getLineInfo(line)['flags']
+                flags = flags_dict.get(line, flags)
+                expectation = expect_preconfigured_dict.get(
+                    index,
+                    expect_preconfigured,
+                )
+                mask = sum(
+                    y
+                    for x, y in _EXPECT_PRECONFIGURED_LIST
+                    if expectation & x
+                )
+                if flags & mask != line_flags & mask:
+                    raise FlagMismatch(
+                        line=line,
+                        line_flags=line_flags,
+                        request_flags=flags,
+                        expectation=expectation,
+                        mask=mask,
+                    )
         line_count = len(line_list)
         line_request = gpio_v2_line_request(
             consumer=consumer,

@@ -29,7 +29,7 @@ This is only to be taken as a quick overview of this module's API.
 
 .. code:: python
 
-    from gpiochip2 import GPIOChip, GPIO_V2_LINE_FLAG
+    from gpiochip2 import GPIOChip, GPIO_V2_LINE_FLAG, EXPECT_PRECONFIGURED
     with GPIOChip('/dev/gpiochip0', 'w+b') as gpiochip:
         # Get information about the gpio chip itself
         gpiochip.getInfo()
@@ -46,6 +46,14 @@ This is only to be taken as a quick overview of this module's API.
             default_dict={
                 # Drive line 20 low immediately on opening
                 0: False,
+            },
+            # Expect the GPIO lines to be correctly preconfigured (ex: by board-
+            # specific firmware or devicetree).
+            expect_preconfigured=EXPECT_PRECONFIGURED.DIRECTION,
+            expect_preconfigured_dict={
+                # Expect line 26 to have its edge detection preconfigured
+                # in addition to its direction
+                2: EXPECT_PRECONFIGURED.DIRECTION | EXPECT_PRECONFIGURED.EDGE,
             },
         ) as gpio_lines:
             # Read lines state
