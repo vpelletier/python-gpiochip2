@@ -435,8 +435,8 @@ class GPIOChip(IOCTLFileIO):
     def openLines( # pylint: disable=too-many-arguments
         self,
         line_list: List[int],
-        flags: int,
         consumer: bytes,
+        flags: int=0,
         flags_dict: Optional[Dict[int, int]]=(), # type: ignore
         default_dict: Optional[Dict[int, bool]]=(), # type: ignore
         debounce_period_us_dict: Optional[Dict[int, int]]=(), # type: ignore
