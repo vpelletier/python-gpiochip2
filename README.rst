@@ -59,11 +59,11 @@ This is only to be taken as a quick overview of this module's API.
             # Read lines state
             value = gpio_lines.value
             # Change lines state
-            gpio_lines.value = 0b11
+            gpio_lines.value = 0b100 # set line 26, clear lines 21 and 20
             # Set line 21
             gpio_lines |= 2 # 1 << 1
-            # Clear line 20
-            gpio_lines &= 1 # 1 << 0
+            # Clear line 26
+            gpio_lines &= 4 # 1 << 2
             # Read event
             gpio_lines.getEvent()
 
