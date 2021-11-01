@@ -65,7 +65,7 @@ This is only to be taken as a quick overview of this module's API.
             # Clear line 20
             gpio_lines &= 1 # 1 << 0
             # Read event
-            lines.getEvent()
+            gpio_lines.getEvent()
 
 Notes on bit operations:
 
