@@ -54,9 +54,8 @@ from .linux_gpio import (
     GPIO_V2_LINE_SET_VALUES_IOCTL,
     gpio_v2_line_values,
 )
-from ._version import get_versions
-__version__ = get_versions()['version']
-del get_versions
+from . import _version
+__version__ = _version.get_versions()['version']
 
 if TYPE_CHECKING:
     # The intent is just to react to missing modules/module members, but
